@@ -3,7 +3,7 @@ import re
 import attr
 from clldutils.misc import nfilter
 
-from pyasjp.meanings import *
+from pyasjp.meanings import *  # noqa: F403
 
 __all__ = ['Transcriber', 'Source', 'Word', 'Synset', 'Doculect', 'ASJPCODES', 'txt_header']
 
@@ -14,7 +14,8 @@ __all__ = ['Transcriber', 'Source', 'Word', 'Synset', 'Doculect', 'ASJPCODES', '
 # STUF – Language Typology and Universals 61:285-308.
 ASJPCODES = 'pbfvmw8tdszcnrlSZCjT5ykgxNqXh7L4G!ieE3auo'
 MISSING_WORD = 'XXX'
-LANGUAGE_LINE_PATTERN = re.compile(r'(?P<name>[^{]+){(?P<w>[^|]*)\|(?P<e>[^@}]*)(@(?P<g>[^\}]*))?\}?')
+LANGUAGE_LINE_PATTERN = re.compile(
+    r'(?P<name>[^{]+){(?P<w>[^|]*)\|(?P<e>[^@}]*)(@(?P<g>[^\}]*))?\}?')
 
 
 @attr.s
@@ -81,8 +82,11 @@ def txt_header(synonyms=2, words=28, year=1700):
      2    28  1700     3
 (I4,20X,10A1)
     """
-    rjust = lambda n, s=6: str(n).rjust(s)
-    lines = ['%s%s%s%s%s%s' % tuple(map(rjust, (synonyms, words, year, 3, 92, 72))), '(I4,20X,10A1)']
+    def rjust(n, s=6):
+        return str(n).rjust(s)
+
+    lines = [
+        '%s%s%s%s%s%s' % tuple(map(rjust, (synonyms, words, year, 3, 92, 72))), '(I4,20X,10A1)']
 
     for mid, concept in sorted(MEANINGS_ALL.items(), key=lambda p: p[0]):
         lines.append('%s%s%s' % (rjust(mid, 4), 20 * ' ', concept))
