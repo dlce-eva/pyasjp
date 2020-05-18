@@ -1,0 +1,216 @@
+     2    40  1700     
+(I4,20X,10A1)
+   1                    I
+   2                    you
+   3                    we
+  11                    one
+  12                    two
+  18                    person
+  19                    fish
+  21                    dog
+  22                    louse
+  23                    tree
+  25                    leaf
+  28                    skin
+  30                    blood
+  31                    bone
+  34                    horn
+  39                    ear
+  40                    eye
+  41                    nose
+  43                    tooth
+  44                    tongue
+  47                    knee
+  48                    hand
+  51                    breast
+  53                    liver
+  54                    drink
+  57                    see
+  58                    hear
+  61                    die
+  66                    come
+  72                    sun
+  74                    star
+  75                    water
+  77                    stone
+  82                    fire
+  85                    path
+  86                    mountain
+  92                    night 
+  95                    full
+  96                    new
+ 100                    name
+                                     
+i   
+e
+E
+a
+3
+o
+u
+p
+b
+m
+w
+v       
+f       
+8       
+t
+d
+s
+z
+c
+n
+4       
+S
+Z       
+C
+j       
+5
+y
+T       
+l
+L       
+k
+g
+N
+x
+q
+G       
+X
+7
+h
+r
+!       
+*
+"
+~      
+$
+     
+       
+GWI{Kho.CENTRAL_KHOISAN|Khoisan,SouthernAfrica,Central,Tshu-Khwe,Southwest}
+ 3  -22.67   21.75        2500         gwj
+1 I	kere //
+2 you	ce, ca //
+3 we	ite //
+11 one	!w~i //
+12 two	!am //
+18 person	kue, kw~e //
+19 fish	!ao // lit. ‘snake’  
+21 dog	aba, arugu //
+22 louse	kone //
+23 tree	i //
+25 leaf	dana //
+28 skin	ko //
+30 blood	!ao //
+31 bone	!owa //
+34 horn	n!~a //
+39 ear	!ei //
+40 eye	!ai //
+41 nose	!ui //
+43 tooth	!oji //
+44 tongue	gy~am //
+47 knee	!ori //
+48 hand	ceu //
+51 breast	Ng~uSa, pi //
+53 liver	!aen //
+54 drink	kX~a //
+57 see	mo, moaha //
+58 hear	kuom, kw~om //
+61 die	!o //
+66 come	a //
+72 sun	!am //
+74 star	!ono //
+75 water	ca //
+77 stone	n!~oa //
+82 fire	!e //
+85 path	gy~o //
+86 mountain	!abi //
+92 night	hx~aeSika //
+95 full	!oe, !oeha //
+96 new	kaba //
+100 name	!uo5 //
+GXANA{Kho.CENTRAL_KHOISAN|Khoisan,SouthernAfrica,Central,Tshu-Khwe,Northwest}
+ 1  -22.17   23.33        2000         gnk
+1 I	ke //
+2 you	ce, ca //
+3 we	ite //
+11 one	!w~i //
+12 two	!am //
+18 person	kue, kw~e //
+19 fish	!ao // lit. ‘snake’  
+21 dog	aba //
+22 louse	kone //
+23 tree	i //
+25 leaf	dana //
+28 skin	ko //
+30 blood	!ao //
+31 bone	!owa //
+34 horn	n!~a //
+39 ear	!ei //
+40 eye	!ai //
+41 nose	!ui //
+43 tooth	!oji //
+44 tongue	dam //
+47 knee	!ori //
+48 hand	ceu //
+51 breast	Ng~uSa, pi //
+53 liver	!aen //
+54 drink	kX~a //
+57 see	mo, moaha //
+58 hear	kuom, kw~om //
+61 die	!o //
+66 come	a //
+72 sun	!am //
+74 star	!ono //
+75 water	ca //
+77 stone	n!~oa //
+82 fire	!e //
+85 path	dao //
+86 mountain	!abi //
+92 night	hx~aeSika, n!~uaka //
+95 full	!oe, !oeha //
+96 new	kaba //
+100 name	!uo5 //
+JUHOAN{Kho.NORTHERN_KHOISAN|Khoisan,SouthernAfrica,Northern}
+ 2  -19.00   21.00        5000   juh   ktz
+1 I	mi //
+2 you	XXX // (only V)  
+3 we	m, m!a //
+11 one	!N~e7e //
+12 two	ca*, ca* //
+18 person	Zu //
+19 fish	!7~3u //
+21 dog	g!kh$wi*, g!kh$wa //
+22 louse	!N~a, kx~uri //
+23 tree	!ai*h //
+25 leaf	!N~u7ubu //
+28 skin	!N~o //
+30 blood	!h~aN, Za7a //
+31 bone	!h~u* //
+34 horn	!kh$u //
+39 ear	!h~wi, !wa*!a //
+40 eye	!g~a7a, kx~wasi //
+41 nose	tzu*, !wi*h //
+43 tooth	!N~ah, tz3u //
+44 tongue	dth$ari //
+47 knee	!gx$wa, !gx$wa!N~ai //
+48 hand	!g~3u //
+51 breast	ku //
+53 liver	XXX //
+54 drink	Ch~i //
+57 see	ho, se //
+58 hear	ca7a //
+61 die	!ai //
+66 come	ci, !g~a //
+72 sun	!am, kh~a!h~a* //
+74 star	!u*h //
+75 water	!g~u, domswa* //
+77 stone	!N~om //
+82 fire	da7a, !x~we //
+85 path	!N~ama, !kh$a //
+86 mountain	!N~om, !x~uni //
+92 night	!g~u, !g~uh //
+95 full	!g~a7i*, !7abu //
+96 new	!oXa, !u //
+100 name	!u //
