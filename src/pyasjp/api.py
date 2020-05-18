@@ -55,14 +55,9 @@ class ASJP(API):
 
     @lazyproperty
     def sources(self):
-        res = {
+        return {
             row['ASJP_NAME'].lower(): models.Source(**{k.lower(): v for k, v in row.items()})
             for row in reader(self.repos / 'sources.csv', dicts=True)}
-        for row in reader(self.repos.parent.parent / 'sources_listss18.csv', dicts=True, encoding='latin1'):
-            s = models.Source(**{k.lower(): v for k, v in row.items()})
-            if s.asjp_name.lower() not in res:
-                res[s.asjp_name.lower()] = s
-        return res
 
     def source(self, dl):
         return self.sources.get(dl.asjp_name.lower())
