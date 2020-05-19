@@ -1,6 +1,15 @@
 from pyasjp.models import *
 
 
+def test_Synset_from_txt(caplog):
+    ss = Synset.from_txt('1. I\tXXX //')
+    assert not ss.words
+    assert ss.meaning_id == 1
+
+    assert not Synset.from_txt('1 I\tABC //').words
+    assert caplog.records
+
+
 def test_Doculect_asjp_name():
     dl = Doculect.from_txt(""""ESK_A'Y/AN{F.G|@}\n 1    9.43  124.24          -1         esy""")
     assert dl.asjp_name == 'ESK_AY_AN'

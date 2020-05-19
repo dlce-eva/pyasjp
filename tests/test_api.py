@@ -16,7 +16,7 @@ def test_ASJP_iter_doculects(repos):
     dls = list(api.iter_doculects())
     gwi = dls[0]
     assert str(gwi).startswith('GWI')
-    assert api.source(gwi) and api.source(gwi).list_made_by[0] in api.transcribers
+    assert api.source(gwi) and api.transcriber(gwi)
 
 
 def test_ASJP_to_text(repos):

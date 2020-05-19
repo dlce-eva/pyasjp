@@ -1,3 +1,6 @@
+import itertools
+import collections
+
 from clldutils.apilib import API
 from clldutils.misc import lazyproperty
 from csvw.dsv import reader
@@ -55,12 +58,21 @@ class ASJP(API):
 
     @lazyproperty
     def sources(self):
-        return {
-            row['ASJP_NAME'].lower(): models.Source(**{k.lower(): v for k, v in row.items()})
-            for row in reader(self.repos / 'sources.csv', dicts=True)}
+        res = collections.defaultdict(list)
+        for row in reader(self.repos / 'sources.csv', dicts=True):
+            res[row['ASJP_NAME'].lower().replace('-', '_')].append(models.Source(
+                **{k.lower(): v for k, v in row.items()}))
+        return res
 
     def source(self, dl):
         return self.sources.get(dl.asjp_name.lower())
+
+    def transcriber(self, dl):
+        srcs = self.source(dl)
+        if srcs:
+            return [
+                self.transcribers[trs] for trs in
+                set(itertools.chain(*[src.list_made_by for src in srcs]))]
 
     @lazyproperty
     def transcribers(self):

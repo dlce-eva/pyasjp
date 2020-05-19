@@ -1,4 +1,5 @@
 import re
+import logging
 
 import attr
 from clldutils.misc import nfilter
@@ -12,10 +13,43 @@ __all__ = ['Transcriber', 'Source', 'Word', 'Synset', 'Doculect', 'ASJPCODES', '
 # Automated classification of the world’s languages:
 # a description of the method and preliminary results.
 # STUF – Language Typology and Universals 61:285-308.
-ASJPCODES = 'pbfvmw8tdszcnrlSZCjT5ykgxNqXh7L4G!ieE3auo'
+CONSONANTS = 'pbfvmw8tdszcnrlSZCjT5ykgxNqXh7L4G!'
+VOWELS = 'ieE3auo'
+ASJPCODES = CONSONANTS + VOWELS
+MODIFIERS = ''.join([
+    "*",  # An asterisk following any one of the seven vowel symbols indicates vowel nasalization.
+    "~",  # A modifier that follows two juxtaposed consonants.
+    "$",  # Similar ~ except that it follows three juxtaposed consonants.
+    '"',  # Immediately follows a consonant that is glottalized.
+])
+PUNCTUATION = "'/-? "
 MISSING_WORD = 'XXX'
 LANGUAGE_LINE_PATTERN = re.compile(
     r'(?P<name>[^{]+){(?P<w>[^|]*)\|(?P<e>[^@}]*)(@(?P<g>[^\}]*))?\}?')
+BAD_WORDS = [
+    '5.00E+07',
+    '7.00E+08',
+    '7.00E+07',
+    'NA',
+    '3-Aug',
+    '3-Jan',
+    '3-Mar',
+    '3-Apr',
+    '5-May',
+    'aure\tXXX',
+    's2k',
+    'EKE',
+    '89n',
+    'nEMp3r',
+    'stAlt',
+]
+SYNSET_FIX = {
+    '66 come	ba* / from Miehe 2007/': '66 come	ba* // from Miehe 2007',
+    '18 person	ek"w~a %adami //': '18 person	ek"w~a, %adami //',
+    '57 see	dokh~ot %n3 //': '57 see	dokh~ot, %n3 //',
+    '77 stone	pampaN / from Kroeger 2005/': '77 stone	pampaN // from Kroeger 2005',
+    '28 skin	%na %tiri //': '28 skin	%na, %tiri //',
+}
 
 
 @attr.s
@@ -35,7 +69,9 @@ class Source:
 
 @attr.s
 class Word:
-    form = attr.ib()
+    form = attr.ib(
+        validator=attr.validators.matches_re(
+            '[{}]+'.format(re.escape(ASJPCODES + MODIFIERS + PUNCTUATION))))
     loan = attr.ib(validator=attr.validators.instance_of(bool))
 
     @classmethod
@@ -50,31 +86,49 @@ class Word:
 
 @attr.s
 class Synset:
-    meaning_id = attr.ib(converter=int)
+    meaning_id = attr.ib(converter=int, validator=attr.validators.in_(MEANINGS_ALL.keys()))
+    meaning = attr.ib()
     words = attr.ib()
     comment = attr.ib()
 
     @classmethod
     def from_txt(cls, line):
-        header, body = line.split('\t', 1)
+        header, body = SYNSET_FIX.get(line, line).split('\t', 1)
         body = body.strip()
         comment = ''
         if re.search('  | //', body):
             body, comment = re.split('  | //', body, 1)
+        # Degenerate cases:
+        elif body.endswith('//'):  # pragma: no cover
+            body = body[:-2].strip()
+        elif body.endswith('/'):  # pragma: no cover
+            body = body[:-1].strip()
         comment = comment.strip()
-        words = [word.strip() for word in body.split(',') if word.strip() != MISSING_WORD]
-        number = header.split()[0]
-        if number.endswith('.'):  # pragma: no cover
+        words = []
+        for word in body.split(','):
+            word = word.strip()
+            if word and word != MISSING_WORD and word not in BAD_WORDS:
+                try:
+                    words.append(Word.from_txt(word))
+                except ValueError:
+                    logging.getLogger(__name__).warning('skipping invalid word "{}"'.format(word))
+
+        number, meaning = header.split(maxsplit=1)
+        if number.endswith('.'):
             number = number[:-1].strip()
-        return cls(int(number), [Word.from_txt(w) for w in words], comment or None)
+        return cls(int(number), meaning.strip(), words, comment or None)
 
     @staticmethod
-    def format(mid, form=MISSING_WORD, comment=None):
+    def format(mid, meaning=None, form=MISSING_WORD, comment=None):
         return '{} {}\t{} //{}'.format(
-            mid, MEANINGS_ALL[mid], form, ' ' + comment if comment else '')
+            mid, meaning or MEANINGS_ALL[mid], form, ' ' + comment if comment else '')
 
     def __str__(self):
-        return self.format(self.meaning_id, ', '.join(str(w) for w in self.words), self.comment)
+        return self.format(
+            self.meaning_id,
+            meaning=self.meaning,
+            form=', '.join(str(w) for w in self.words),
+            comment=self.comment)
 
 
 def txt_header(synonyms=2, words=28, year=1700):
