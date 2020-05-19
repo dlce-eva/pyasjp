@@ -109,3 +109,6 @@ MEANINGS_NON_CORE = {
 MEANINGS_ALL = {}
 MEANINGS_ALL.update(MEANINGS)
 MEANINGS_ALL.update(MEANINGS_NON_CORE)
+# Check consistency of the meanings:
+assert list(MEANINGS_ALL.keys()) == list(range(1, 101))  # Keys are numbers from 1 to 100.
+assert len(set(MEANINGS_ALL.values())) == 100  # Meaning labels are unique.

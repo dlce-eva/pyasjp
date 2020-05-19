@@ -2,9 +2,10 @@ from pyasjp.models import *
 
 
 def test_Synset_from_txt(caplog):
-    ss = Synset.from_txt('1. I\tXXX //')
+    ss = Synset.from_txt('1. I\tXXX / a comment/')
     assert not ss.words
     assert ss.meaning_id == 1
+    assert ss.comment == 'a comment'
 
     assert not Synset.from_txt('1 I\tABC //').words
     assert caplog.records

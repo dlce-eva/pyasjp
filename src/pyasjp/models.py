@@ -44,10 +44,8 @@ BAD_WORDS = [
     'stAlt',
 ]
 SYNSET_FIX = {
-    '66 come	ba* / from Miehe 2007/': '66 come	ba* // from Miehe 2007',
     '18 person	ek"w~a %adami //': '18 person	ek"w~a, %adami //',
-    '57 see	dokh~ot %n3 //': '57 see	dokh~ot, %n3 //',
-    '77 stone	pampaN / from Kroeger 2005/': '77 stone	pampaN // from Kroeger 2005',
+    '57 see	dokh~ot %n3 //': '57 see	%dokh~otn3 //',
     '28 skin	%na %tiri //': '28 skin	%na, %tiri //',
 }
 
@@ -99,10 +97,13 @@ class Synset:
         if re.search('  | //', body):
             body, comment = re.split('  | //', body, 1)
         # Degenerate cases:
+        elif re.fullmatch('[^/]+/\s*[^/]+/$', body):
+            body, comment, _ = body.split('/')
+            body = body.strip()
         elif body.endswith('//'):  # pragma: no cover
             body = body[:-2].strip()
-        elif body.endswith('/'):  # pragma: no cover
-            body = body[:-1].strip()
+        #elif body.endswith('/'):  # pragma: no cover
+        #    body = body[:-1].strip()
         comment = comment.strip()
         words = []
         for word in body.split(','):
