@@ -1,4 +1,12 @@
+import pytest
+
 from pyasjp.models import *
+from pyasjp.meanings import MEANINGS_ALL
+
+
+def test_valid_strict_orthography():
+    with pytest.raises(ValueError):
+        valid_strict_orthography('t*a')
 
 
 def test_Synset_from_txt(caplog):
@@ -61,3 +69,35 @@ ESKAYAN{Oth.UNCLASSIFIED|Mixedlanguage,Cebuano-Spanish-English@ArtificialLanguag
 96 new\ttibil //
 100 name\tlaNg~is, laNis //"""
     assert txt == Doculect.from_txt(txt).to_txt(add_missing=True)
+
+
+def test_fixing():
+    txt = """\
+ZHAOZHUANG_BAI{ST.BAI|Sino-Tibetan,Tibeto-Burman,NortheasternTibeto-Burman,Bai@}
+ 1   25.56  100.26      400000   bai   bfs
+1 I	No //
+2 we	5a //
+3 water	sy~i //
+12 tree	cu //
+42 tooth	ci pa //
+43 tongue	ce //
+75 two	ko, ne //
+85 person	5i ka //
+100 name	mia //"""
+    dl = Doculect.from_txt(txt)
+    reverse_lookup = {v: k for k, v in MEANINGS_ALL.items()}
+    for ss in dl.synsets:
+        if ss.meaning in reverse_lookup:
+            ss.meaning_id = reverse_lookup[ss.meaning]
+    assert str(dl) == """\
+ZHAOZHUANG_BAI{ST.BAI|Sino-Tibetan,Tibeto-Burman,NortheasternTibeto-Burman,Bai@}
+ 1   25.56  100.26      400000   bai   bfs
+1 I	No //
+3 we	5a //
+12 two	ko, ne //
+18 person	5i ka //
+23 tree	cu //
+43 tooth	ci pa //
+44 tongue	ce //
+75 water	sy~i //
+100 name	mia //"""

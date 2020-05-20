@@ -42,6 +42,9 @@ setup(
         ],
     },
     entry_points={
+        'console_scripts': [
+            'asjp=pyasjp.__main__:main',
+        ]
     },
 )
 

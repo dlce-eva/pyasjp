@@ -6,7 +6,10 @@ from clldutils.misc import nfilter
 
 from pyasjp.meanings import *  # noqa: F403
 
-__all__ = ['Transcriber', 'Source', 'Word', 'Synset', 'Doculect', 'ASJPCODES', 'txt_header']
+__all__ = [
+    'Transcriber', 'Source', 'Word', 'Synset', 'Doculect', 'ASJPCODES', 'txt_header',
+    'valid_strict_orthography',
+]
 
 # see
 # Brown, Cecil H., Eric W. Holman, Søren Wichmann, and Viveka Vilupillai. 2008.
@@ -22,32 +25,22 @@ MODIFIERS = ''.join([
     "$",  # Similar ~ except that it follows three juxtaposed consonants.
     '"',  # Immediately follows a consonant that is glottalized.
 ])
-PUNCTUATION = "'/-? "
+PUNCTUATION = " "
+WORD_PATTERN = re.compile('[{}]+'.format(re.escape(ASJPCODES + MODIFIERS + PUNCTUATION)))
 MISSING_WORD = 'XXX'
 LANGUAGE_LINE_PATTERN = re.compile(
     r'(?P<name>[^{]+){(?P<w>[^|]*)\|(?P<e>[^@}]*)(@(?P<g>[^\}]*))?\}?')
-BAD_WORDS = [
-    '5.00E+07',
-    '7.00E+08',
-    '7.00E+07',
-    'NA',
-    '3-Aug',
-    '3-Jan',
-    '3-Mar',
-    '3-Apr',
-    '5-May',
-    'aure\tXXX',
-    's2k',
-    'EKE',
-    '89n',
-    'nEMp3r',
-    'stAlt',
-]
-SYNSET_FIX = {
-    '18 person	ek"w~a %adami //': '18 person	ek"w~a, %adami //',
-    '57 see	dokh~ot %n3 //': '57 see	%dokh~otn3 //',
-    '28 skin	%na %tiri //': '28 skin	%na, %tiri //',
-}
+
+
+def valid_strict_orthography(word):
+    for modifier, modified in [
+        ('*', VOWELS),
+        ('~', CONSONANTS),
+        ('$', CONSONANTS),
+        ('"', CONSONANTS),
+    ]:
+        if re.search('(?<![{}]){}'.format(re.escape(modified), re.escape(modifier)), word):
+            raise ValueError('Misplaced modifier: {}'.format(word))
 
 
 @attr.s
@@ -65,11 +58,14 @@ class Source:
     list_made_by = attr.ib(converter=lambda s: nfilter([ss.strip() for ss in re.split('/|->', s)]))
 
 
+def valid_word(instance, attribute, value):
+    if not WORD_PATTERN.fullmatch(value):
+        raise ValueError('Invalid form: {}'.format(value))
+
+
 @attr.s
 class Word:
-    form = attr.ib(
-        validator=attr.validators.matches_re(
-            '[{}]+'.format(re.escape(ASJPCODES + MODIFIERS + PUNCTUATION))))
+    form = attr.ib(validator=valid_word)
     loan = attr.ib(validator=attr.validators.instance_of(bool))
 
     @classmethod
@@ -91,24 +87,22 @@ class Synset:
 
     @classmethod
     def from_txt(cls, line):
-        header, body = SYNSET_FIX.get(line, line).split('\t', 1)
+        header, body = line.split('\t', 1)
         body = body.strip()
         comment = ''
         if re.search('  | //', body):
             body, comment = re.split('  | //', body, 1)
         # Degenerate cases:
-        elif re.fullmatch('[^/]+/\s*[^/]+/$', body):
+        elif re.fullmatch(r'[^/]+/\s*[^/]+/$', body):
             body, comment, _ = body.split('/')
             body = body.strip()
         elif body.endswith('//'):  # pragma: no cover
             body = body[:-2].strip()
-        #elif body.endswith('/'):  # pragma: no cover
-        #    body = body[:-1].strip()
         comment = comment.strip()
         words = []
         for word in body.split(','):
             word = word.strip()
-            if word and word != MISSING_WORD and word not in BAD_WORDS:
+            if word and word != MISSING_WORD:
                 try:
                     words.append(Word.from_txt(word))
                 except ValueError:
