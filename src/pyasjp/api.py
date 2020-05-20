@@ -47,7 +47,7 @@ class ASJP(API):
     def iter_doculects(self, p=None):
         ids = set()
         p = p or self.repos / 'lists.txt'
-        with p.open(encoding='latin1') as fp:
+        with p.open(encoding='cp1252') as fp:
             for chunk in iter_chunks(fp):
                 d = models.Doculect.from_txt('\n'.join(chunk))
                 if d.id in ids:  # pragma: no cover
@@ -59,9 +59,12 @@ class ASJP(API):
     @lazyproperty
     def sources(self):
         res = collections.defaultdict(list)
-        for row in reader(self.repos / 'sources.csv', dicts=True):
+        for i, row in enumerate(
+            reader(self.repos / 'sources.csv', dicts=True, encoding='cp1252'),
+            start=1,
+        ):
             res[row['ASJP_NAME'].lower().replace('-', '_')].append(models.Source(
-                **{k.lower(): v for k, v in row.items()}))
+                id=i, **{k.lower(): v for k, v in row.items()}))
         return res
 
     def source(self, dl):

@@ -51,6 +51,7 @@ class Transcriber:
 
 @attr.s
 class Source:
+    id = attr.ib()
     asjp_name = attr.ib()
     author = attr.ib()
     year = attr.ib()
@@ -98,6 +99,8 @@ class Synset:
             body = body.strip()
         elif body.endswith('//'):  # pragma: no cover
             body = body[:-2].strip()
+        elif body.endswith('/'):  # pragma: no cover
+            body = body[:-1].strip()
         comment = comment.strip()
         words = []
         for word in body.split(','):
