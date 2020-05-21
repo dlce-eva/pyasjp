@@ -1,6 +1,8 @@
 """
 Convert an ASJP database to tab-delimited "formatted" data.
 """
+import csv
+
 from clldutils.clilib import PathType
 from csvw.dsv import UnicodeWriter
 
@@ -15,7 +17,7 @@ def register(parser):
 def run(args):
     api = ASJP(args.list if args.list.is_dir() else '.')
 
-    with UnicodeWriter(args.out, delimiter='\t', quotechar=None) as w:
+    with UnicodeWriter(args.out, delimiter='\t', quoting=csv.QUOTE_NONE, quotechar="") as w:
         for i, dl in enumerate(api.iter_doculects(args.list if args.list.is_file() else None)):
             if not i:
                 w.writerow(dl.formatted_header())
