@@ -121,6 +121,9 @@ class Synset:
         return '{} {}\t{} //{}'.format(
             mid, meaning or MEANINGS_ALL[mid], form, ' ' + comment if comment else '')
 
+    def format_words(self):
+        return ', '.join(str(w) for w in self.words) or MISSING_WORD
+
     def __str__(self):
         return self.format(
             self.meaning_id,
@@ -167,6 +170,11 @@ class Doculect:
     code_wals = attr.ib()
     code_iso = attr.ib()
     synsets = attr.ib(converter=lambda v: [vv for vv in v if vv.words])
+
+    def get(self, item):
+        for ss in self.synsets:
+            if ss.meaning_id == item or ss.meaning == item or MEANINGS_ALL[ss.meaning_id] == item:
+                return ss
 
     @property
     def asjp_name(self):
@@ -255,16 +263,23 @@ class Doculect:
     def __str__(self):
         return self.to_txt()
 
+    def format(self, what):
+        val = getattr(self, what)
+        if what in ['latitude', 'longitude'] and val is not None:
+            return '{:.2f}'.format(getattr(self, what))
+        if what == 'number_of_speakers':
+            if self.year_of_extinction:
+                val = -self.year_of_extinction
+            elif self.recently_extinct:
+                val = -1
+            elif self.long_extinct:
+                val = -2
+            return str(val)
+        return val or ''
+
     def to_txt(self, add_missing=False, full_list=False, wals_marker='1'):
         """render the wordlist in the ASJP plain text format.
         """
-        nos = self.number_of_speakers
-        if self.year_of_extinction:
-            nos = -self.year_of_extinction
-        elif self.recently_extinct:
-            nos = -1
-        elif self.long_extinct:
-            nos = -2
         lines = [
             '%s{%s|%s@%s}' % (
                 self.id,
@@ -273,9 +288,9 @@ class Doculect:
                 self.classification_glottolog or ''),
             '%s%s%s%s%s%s' % (
                 wals_marker.rjust(2),
-                ('' if self.latitude is None else ('%.2f' % self.latitude)).rjust(8),
-                ('' if self.longitude is None else ('%.2f' % self.longitude)).rjust(8),
-                str(nos).rjust(12),
+                self.format('latitude').rjust(8),
+                self.format('longitude').rjust(8),
+                self.format('number_of_speakers').rjust(12),
                 (self.code_wals or '').rjust(6),
                 (self.code_iso or '').rjust(6))]
         synsets = {s.meaning_id: s for s in self.synsets}
@@ -285,3 +300,26 @@ class Doculect:
             elif add_missing and ((mid in MEANINGS) or full_list):
                 lines.append(Synset.format(mid))
         return '\n'.join(lines)
+
+    @staticmethod
+    def formatted_header():
+        res = ['names', 'wls_fam', 'wls_gen', 'e', 'hh', 'lat', 'lon', 'pop', 'wcode', 'iso']
+        return res + [v for _, v in sorted(MEANINGS_ALL.items(), key=lambda i: i[0])]
+
+    def to_formatted_row(self):
+        res = [
+            self.id,
+            self.wals_family,
+            self.wals_genus,
+            self.classification_ethnologue,
+            self.classification_glottolog,
+            self.format('latitude'),
+            self.format('longitude'),
+            self.format('number_of_speakers'),
+            self.code_wals or '',
+            self.code_iso or '',
+        ]
+        synsets = {s.meaning_id: s for s in self.synsets}
+        for mid in sorted(MEANINGS_ALL.keys()):
+            res.append(synsets[mid].format_words() if mid in synsets else MISSING_WORD)
+        return res
