@@ -1,5 +1,6 @@
 import re
 import logging
+import functools
 
 import attr
 from clldutils.misc import nfilter
@@ -154,6 +155,12 @@ def txt_header(synonyms=2, words=28, year=1700):
     return '\n'.join(lines)
 
 
+def valid_range(min, max, instance, attribute, value):
+    if value is not None:
+        if not min <= value <= max:
+            raise ValueError('invalid {}: {}'.format(attribute, value))
+
+
 @attr.s
 class Doculect:
     id = attr.ib()
@@ -161,8 +168,8 @@ class Doculect:
     classification_wals = attr.ib()
     classification_ethnologue = attr.ib()
     classification_glottolog = attr.ib()
-    latitude = attr.ib()
-    longitude = attr.ib()
+    latitude = attr.ib(validator=functools.partial(valid_range, -90, 90))
+    longitude = attr.ib(validator=functools.partial(valid_range, -180, 180))
     number_of_speakers = attr.ib()
     recently_extinct = attr.ib()
     long_extinct = attr.ib()
@@ -283,9 +290,9 @@ class Doculect:
         lines = [
             '%s{%s|%s@%s}' % (
                 self.id,
-                self.classification_wals or '',
-                self.classification_ethnologue or '',
-                self.classification_glottolog or ''),
+                self.format('classification_wals'),
+                self.format('classification_ethnologue'),
+                self.format('classification_glottolog')),
             '%s%s%s%s%s%s' % (
                 wals_marker.rjust(2),
                 self.format('latitude').rjust(8),
