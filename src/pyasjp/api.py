@@ -60,7 +60,7 @@ class ASJP(API):
     def sources(self):
         res = collections.defaultdict(list)
         for i, row in enumerate(
-            reader(self.repos / 'sources.csv', dicts=True, encoding='cp1252'),
+            reader(self.repos / 'sources.csv', dicts=True, encoding='utf8'),
             start=1,
         ):
             res[row['ASJP_NAME'].lower().replace('-', '_')].append(models.Source(
