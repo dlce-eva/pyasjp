@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='pyasjp',
-    version='1.2.1.dev0',
+    version='1.3.0',
     license='Apache 2.0',
     description='programmatic access to ASJP',
     long_description=open('README.md').read(),
@@ -32,7 +32,7 @@ setup(
         'clldutils>=3.5',
     ],
     extras_require={
-        'dev': ['flake8', 'wheel', 'twine'],
+        'dev': ['flake8', 'wheel', 'twine', 'build'],
         'test': [
             'pytest>=5',
             'pytest-mock',
