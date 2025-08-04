@@ -29,6 +29,16 @@ def test_Doculect_asjp_name():
     assert dl.asjp_name == 'ESK_AY_AN'
 
 
+def test_Doculect_repeated_meaning():
+    with pytest.raises(AssertionError):
+        Doculect.from_txt("""\
+    BEDJA_BEDAWI{AA.BEJA|Afro-Asiatic,Cushitic,North@Afro-Asiatic,Cushitic}
+     3   19.00   36.00     3364000   bej   bej
+    1 I\tXXX //
+    1 I\tuk, ukna //
+""")
+
+
 def test_Doculect_formatted():
     dl = Doculect.from_txt("""\
 BEDJA_BEDAWI{AA.BEJA|Afro-Asiatic,Cushitic,North@Afro-Asiatic,Cushitic}

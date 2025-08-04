@@ -26,6 +26,10 @@ def iter_chunks(fp):
 
 
 class ASJP(API):
+    def __init__(self, repos=None):
+        super().__init__(repos)
+        self.missing_transcribers = collections.Counter()
+
     def to_txt(self, *doculects, **kw):
         res = [models.txt_header()]
         wals_family, wals_genus = None, None
@@ -73,9 +77,11 @@ class ASJP(API):
     def transcriber(self, dl):
         srcs = self.source(dl)
         if srcs:
-            return [
-                self.transcribers[trs] for trs in
-                set(itertools.chain(*[src.list_made_by for src in srcs]))]
+            trss = sorted(set(itertools.chain(*[src.list_made_by for src in srcs])))
+            for trs in trss:
+                if trs not in self.transcribers:  # pragma: no cover
+                    self.missing_transcribers.update([trs])
+            return [self.transcribers[trs] for trs in trss if trs in self.transcribers]
 
     @lazyproperty
     def transcribers(self):

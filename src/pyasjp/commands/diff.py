@@ -1,5 +1,8 @@
 """
 Diff synsets between two ASJP releases.
+
+This command only compares the forms for synsets present in both releases, i.e. whether forms have
+changed - **not** whether synsets were added or removed.
 """
 import collections
 

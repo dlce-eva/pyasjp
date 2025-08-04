@@ -1,11 +1,12 @@
 import re
 import logging
 import functools
+import collections
 
 import attr
 from clldutils.misc import nfilter
 
-from pyasjp.meanings import *  # noqa: F403
+from pyasjp.meanings import MEANINGS, MEANINGS_ALL
 
 __all__ = [
     'Transcriber', 'Source', 'Word', 'Synset', 'Doculect', 'ASJPCODES', 'txt_header',
@@ -93,7 +94,7 @@ class Synset:
         body = body.strip()
         comment = ''
         if re.search('  | //', body):
-            body, comment = re.split('  | //', body, 1)
+            body, comment = re.split('  | //', body, maxsplit=1)
         # Degenerate cases:
         elif re.fullmatch(r'[^/]+/\s*[^/]+/$', body):
             body, comment, _ = body.split('/')
@@ -250,11 +251,18 @@ class Doculect:
         except ValueError:  # pragma: no cover
             _, lat, lng, nos, code_wals, code_iso = line.strip().split()
             nos = int(nos)
+        assert all(('\t' in line) or (not line.strip()) for line in lines[2:])
+        words = [line for line in lines[2:] if '\t' in line]
+        synsets = collections.OrderedDict()
+        for line in words:
+            synset = Synset.from_txt(line)
+            assert synset.meaning_id not in synsets, '{}: {}'.format(m.group('name'), line)
+            synsets[synset.meaning_id] = synset
         return cls(
             id=m.group('name'),
             name=' '.join(s.capitalize() for s in m.group('name').split('_')),
             classification_wals=m.group('w') if m.group('w') else None,
-            classification_ethnologue=m.group('e') if m.group('e') else None,
+            classification_ethnologue=m .group('e') if m.group('e') else None,
             classification_glottolog=m.group('g') if m.group('g') else None,
             latitude=float(lat) if lat else None,
             longitude=float(lng) if lng else None,
@@ -264,7 +272,7 @@ class Doculect:
             year_of_extinction=abs(nos) if nos < -2 else None,
             code_wals=code_wals,
             code_iso=code_iso,
-            synsets=[Synset.from_txt(line) for line in lines[2:] if '\t' in line],
+            synsets=list(synsets.values()),
         )
 
     def __str__(self):
