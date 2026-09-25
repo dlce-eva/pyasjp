@@ -34,14 +34,14 @@ twine upload dist/*
 ```
 
 - Push to github:
-```
+```shell
 git push origin
 git push --tags
 ```
 
 - Change version for the next release cycle, i.e. incrementing and adding .dev0
 
-  - `setup.py`
+  - `setup.cfg`
   - `src/pyasjp/__init__.py`
 
 - Commit/push the version change:
