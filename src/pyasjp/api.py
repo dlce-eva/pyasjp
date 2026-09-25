@@ -1,8 +1,8 @@
+import functools
 import itertools
 import collections
 
 from clldutils.apilib import API
-from clldutils.misc import lazyproperty
 from csvw.dsv import reader
 
 from pyasjp import models
@@ -60,7 +60,7 @@ class ASJP(API):
                 ids.add(d.id)
                 yield d
 
-    @lazyproperty
+    @functools.cached_property
     def sources(self):
         res = collections.defaultdict(list)
         for i, row in enumerate(
@@ -83,7 +83,7 @@ class ASJP(API):
                     self.missing_transcribers.update([trs])
             return [self.transcribers[trs] for trs in trss if trs in self.transcribers]
 
-    @lazyproperty
+    @functools.cached_property
     def transcribers(self):
         return {
             t.id: t for t in

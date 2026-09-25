@@ -1,9 +1,9 @@
 import re
 import logging
-import functools
 import collections
+import dataclasses
+from typing import Optional
 
-import attr
 from clldutils.misc import nfilter
 
 from pyasjp.meanings import MEANINGS, MEANINGS_ALL
@@ -31,7 +31,7 @@ PUNCTUATION = " "
 WORD_PATTERN = re.compile('[{}]+'.format(re.escape(ASJPCODES + MODIFIERS + PUNCTUATION)))
 MISSING_WORD = 'XXX'
 LANGUAGE_LINE_PATTERN = re.compile(
-    r'(?P<name>[^{]+){(?P<w>[^|]*)\|(?P<e>[^@}]*)(@(?P<g>[^\}]*))?\}?')
+    r'(?P<name>[^{]+){(?P<w>[^|]*)\|(?P<e>[^@}]*)(@(?P<g>[^}]*))?}?')
 
 
 def valid_strict_orthography(word):
@@ -45,31 +45,33 @@ def valid_strict_orthography(word):
             raise ValueError('Misplaced modifier: {}'.format(word))
 
 
-@attr.s
+@dataclasses.dataclass
 class Transcriber:
-    id = attr.ib()
-    name = attr.ib()
+    id: str
+    name: str
 
 
-@attr.s
+@dataclasses.dataclass
 class Source:
-    id = attr.ib()
-    asjp_name = attr.ib()
-    author = attr.ib()
-    year = attr.ib()
-    title_etc = attr.ib()
-    list_made_by = attr.ib(converter=lambda s: nfilter([ss.strip() for ss in re.split('/|->', s)]))
+    id: str
+    asjp_name: str
+    author: str
+    year: str
+    title_etc: str
+    list_made_by: list[str]
+
+    def __post_init__(self):
+        self.list_made_by = nfilter([ss.strip() for ss in re.split(r'/|->', self.list_made_by)])
 
 
-def valid_word(instance, attribute, value):
-    if not WORD_PATTERN.fullmatch(value):
-        raise ValueError('Invalid form: {}'.format(value))
-
-
-@attr.s
+@dataclasses.dataclass
 class Word:
-    form = attr.ib(validator=valid_word)
-    loan = attr.ib(validator=attr.validators.instance_of(bool))
+    form: str
+    loan: bool
+
+    def __post_init__(self):
+        assert WORD_PATTERN.fullmatch(self.form), self.form
+        assert isinstance(self.loan, bool)
 
     @classmethod
     def from_txt(cls, txt):
@@ -81,12 +83,16 @@ class Word:
         return '%' + self.form if self.loan else self.form
 
 
-@attr.s
+@dataclasses.dataclass
 class Synset:
-    meaning_id = attr.ib(converter=int, validator=attr.validators.in_(MEANINGS_ALL.keys()))
-    meaning = attr.ib()
-    words = attr.ib()
-    comment = attr.ib()
+    meaning_id: int
+    meaning: str
+    words: list[Word]
+    comment: Optional[str]
+
+    def __post_init__(self):
+        self.meaning_id = int(self.meaning_id)
+        assert self.meaning_id in MEANINGS_ALL
 
     @classmethod
     def from_txt(cls, line):
@@ -110,7 +116,7 @@ class Synset:
             if word and word != MISSING_WORD:
                 try:
                     words.append(Word.from_txt(word))
-                except ValueError:
+                except AssertionError:
                     logging.getLogger(__name__).warning('skipping invalid word "{}"'.format(word))
 
         number, meaning = header.split(maxsplit=1)
@@ -156,28 +162,27 @@ def txt_header(synonyms=2, words=28, year=1700):
     return '\n'.join(lines)
 
 
-def valid_range(min, max, instance, attribute, value):
-    if value is not None:
-        if not min <= value <= max:
-            raise ValueError('invalid {}: {}'.format(attribute, value))
-
-
-@attr.s
+@dataclasses.dataclass
 class Doculect:
-    id = attr.ib()
-    name = attr.ib()
-    classification_wals = attr.ib()
-    classification_ethnologue = attr.ib()
-    classification_glottolog = attr.ib()
-    latitude = attr.ib(validator=functools.partial(valid_range, -90, 90))
-    longitude = attr.ib(validator=functools.partial(valid_range, -180, 180))
-    number_of_speakers = attr.ib()
-    recently_extinct = attr.ib()
-    long_extinct = attr.ib()
-    year_of_extinction = attr.ib()
-    code_wals = attr.ib()
-    code_iso = attr.ib()
-    synsets = attr.ib(converter=lambda v: [vv for vv in v if vv.words])
+    id: str
+    name: str
+    classification_wals: Optional[str]
+    classification_ethnologue: Optional[str]
+    classification_glottolog: Optional[str]
+    latitude: Optional[float]
+    longitude: Optional[float]
+    number_of_speakers: int
+    recently_extinct: bool
+    long_extinct: bool
+    year_of_extinction: Optional[int]
+    code_wals: Optional[str]
+    code_iso: Optional[str]
+    synsets: list[Synset]
+
+    def __post_init__(self):
+        self.synsets = [vv for vv in self.synsets if vv.words]
+        assert -90.0 <= self.latitude <= 90.0
+        assert -180.0 <= self.longitude <= 180.0
 
     def get(self, item):
         for ss in self.synsets:
