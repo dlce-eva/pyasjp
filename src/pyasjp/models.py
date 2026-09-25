@@ -181,8 +181,9 @@ class Doculect:
 
     def __post_init__(self):
         self.synsets = [vv for vv in self.synsets if vv.words]
-        assert -90.0 <= self.latitude <= 90.0
-        assert -180.0 <= self.longitude <= 180.0
+        if self.latitude is not None and self.longitude is not None:
+            assert -90.0 <= self.latitude <= 90.0
+            assert -180.0 <= self.longitude <= 180.0
 
     def get(self, item):
         for ss in self.synsets:

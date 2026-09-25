@@ -22,6 +22,7 @@ def test_Synset_from_txt(caplog):
 def test_Doculect_coords():
     with pytest.raises(AssertionError):
         _ = Doculect.from_txt(""""ESK_A'Y/AN{F.G|@}\n 1   99.43  124.24          -1         esy""")
+    _ = Doculect.from_txt(""""ESK_A'Y/AN{F.G|@}\n 1                          -1         esy""")
 
 
 def test_Doculect_asjp_name():
