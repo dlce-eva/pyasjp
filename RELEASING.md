@@ -6,14 +6,13 @@
 tox -r
 ```
 
-- Make sure statement coverage >= 99%
-- Make sure flake8 passes:
+- Make sure linting passes:
 ```shell
-flake8 src
+ruff check src
 ```
 
 - Update the version number, by removing the trailing `.dev0` in:
-  - `setup.cfg`
+  - `pyproject.toml`
   - `src/pyasjp/__init__.py`
 
 - Create the release commit:
@@ -41,7 +40,7 @@ git push --tags
 
 - Change version for the next release cycle, i.e. incrementing and adding .dev0
 
-  - `setup.cfg`
+  - `pyproject.toml`
   - `src/pyasjp/__init__.py`
 
 - Commit/push the version change:

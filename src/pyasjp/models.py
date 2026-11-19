@@ -2,7 +2,6 @@ import re
 import logging
 import collections
 import dataclasses
-from typing import Optional
 
 from clldutils.misc import nfilter
 
@@ -32,6 +31,8 @@ WORD_PATTERN = re.compile('[{}]+'.format(re.escape(ASJPCODES + MODIFIERS + PUNCT
 MISSING_WORD = 'XXX'
 LANGUAGE_LINE_PATTERN = re.compile(
     r'(?P<name>[^{]+){(?P<w>[^|]*)\|(?P<e>[^@}]*)(@(?P<g>[^}]*))?}?')
+RECENTLY_EXTINCT = -1
+LONG_EXTINCT = -2
 
 
 def valid_strict_orthography(word):
@@ -88,7 +89,7 @@ class Synset:
     meaning_id: int
     meaning: str
     words: list[Word]
-    comment: Optional[str]
+    comment: str | None
 
     def __post_init__(self):
         self.meaning_id = int(self.meaning_id)
@@ -166,24 +167,24 @@ def txt_header(synonyms=2, words=28, year=1700):
 class Doculect:
     id: str
     name: str
-    classification_wals: Optional[str]
-    classification_ethnologue: Optional[str]
-    classification_glottolog: Optional[str]
-    latitude: Optional[float]
-    longitude: Optional[float]
+    classification_wals: str | None
+    classification_ethnologue: str | None
+    classification_glottolog: str | None
+    latitude: float | None
+    longitude: float | None
     number_of_speakers: int
     recently_extinct: bool
     long_extinct: bool
-    year_of_extinction: Optional[int]
-    code_wals: Optional[str]
-    code_iso: Optional[str]
+    year_of_extinction: int | None
+    code_wals: str | None
+    code_iso: str | None
     synsets: list[Synset]
 
     def __post_init__(self):
         self.synsets = [vv for vv in self.synsets if vv.words]
         if self.latitude is not None and self.longitude is not None:
-            assert -90.0 <= self.latitude <= 90.0
-            assert -180.0 <= self.longitude <= 180.0
+            assert -90.0 <= self.latitude <= 90.0  # noqa: PLR2004
+            assert -180.0 <= self.longitude <= 180.0  # noqa: PLR2004
 
     def get(self, item):
         for ss in self.synsets:
@@ -273,9 +274,9 @@ class Doculect:
             latitude=float(lat) if lat else None,
             longitude=float(lng) if lng else None,
             number_of_speakers=nos if nos >= 0 else 0,
-            recently_extinct=nos == -1 or nos < -2,
-            long_extinct=nos == -2,
-            year_of_extinction=abs(nos) if nos < -2 else None,
+            recently_extinct=nos == RECENTLY_EXTINCT or nos < LONG_EXTINCT,
+            long_extinct=nos == LONG_EXTINCT,
+            year_of_extinction=abs(nos) if nos < LONG_EXTINCT else None,
             code_wals=code_wals,
             code_iso=code_iso,
             synsets=list(synsets.values()),
@@ -287,7 +288,7 @@ class Doculect:
     def format(self, what):
         val = getattr(self, what)
         if what in ['latitude', 'longitude'] and val is not None:
-            return '{:.2f}'.format(getattr(self, what))
+            return '{:.2f}'.format(getattr(self, what))  # noqa: UP032
         if what == 'number_of_speakers':
             if self.year_of_extinction:
                 val = -self.year_of_extinction
@@ -302,12 +303,12 @@ class Doculect:
         """render the wordlist in the ASJP plain text format.
         """
         lines = [
-            '%s{%s|%s@%s}' % (
+            '%s{%s|%s@%s}' % (  # noqa: UP031
                 self.id,
                 self.format('classification_wals'),
                 self.format('classification_ethnologue'),
                 self.format('classification_glottolog')),
-            '%s%s%s%s%s%s' % (
+            '%s%s%s%s%s%s' % (  # noqa: UP031
                 wals_marker.rjust(2),
                 self.format('latitude').rjust(8),
                 self.format('longitude').rjust(8),

@@ -1,3 +1,96 @@
 [build-system]
-requires = ["setuptools"]
+requires = ["setuptools>=80.0"]
 build-backend = "setuptools.build_meta"
+
+[project]
+name = "pyasjp"
+version = "1.6.0"
+description = "Programmatic access to ASJP data."
+readme = "README.md"
+requires-python = ">=3.11"
+license = "Apache-2.0"
+license-files = ["LICENSE"]
+authors = [
+    {name = "Robert Forkel", email = "dlce.rdm@eva.mpg.de"}
+]
+keywords = ["data", "clld"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Natural Language :: English",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Programming Language :: Python :: 3.15",
+]
+dependencies = [
+    "csvw",
+    "clldutils",
+]
+
+[project.urls]
+Homepage = "https://github.com/dlce-eva/pyasjp"
+
+[project.optional-dependencies]
+dev = [
+    "ruff",
+    "wheel",
+    "build",
+    "twine",
+]
+test = [
+    "pytest>=5",
+    "pytest-mock",
+    "pytest-cov",
+    "tox",
+]
+
+[project.scripts]
+asjp = "pyasjp.__main__:main"
+
+[tool.setuptools]
+zip-safe = false
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.ruff]
+line-length = 100
+exclude = [".tox"]
+
+[tool.ruff.lint]
+select = ["UP", "N", "C90", "PL", "E", "F"]
+ignore = [
+    "PLW2901",
+    "UP031",
+    "UP032",
+]
+
+[tool.pytest.ini_options]
+minversion = "9.0"
+testpaths = ["tests"]
+addopts = [
+    "--cov",
+]
+
+[tool.coverage.run]
+source = [
+    "pyasjp",
+    "tests",
+]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = true
+
+[tool.tox]
+requires = ["tox>=4.19"]
+env_list = ["py311", "py312", "py313", "py314", "py315"]
+skip_missing_interpreters = true
+
+[tool.tox.env_run_base]
+extras = ["test"]
+commands = [["pytest", { replace = "posargs", default = [], extend = true }]]

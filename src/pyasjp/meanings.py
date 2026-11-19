@@ -43,6 +43,7 @@ MEANINGS = {
     100: ['name', 'nombre', 'nom', 'name (noun)'],
 }
 
+NMEANINGS = 100
 MEANINGS_NON_CORE = {
     4: 'this',
     5: 'that',
@@ -109,6 +110,6 @@ MEANINGS_NON_CORE = {
 MEANINGS_ALL = {}
 MEANINGS_ALL.update({k: v[0] for k, v in MEANINGS.items()})
 MEANINGS_ALL.update(MEANINGS_NON_CORE)
-# Check consistency of the meanings:
-assert set(MEANINGS_ALL.keys()) == set(range(1, 101))  # Keys are numbers from 1 to 100.
-assert len(set(MEANINGS_ALL.values())) == 100  # Meaning labels are unique.
+# Check consistency of the meanings (Keys are numbers from 1 to 100):
+assert set(MEANINGS_ALL.keys()) == set(range(1, NMEANINGS + 1))
+assert len(set(MEANINGS_ALL.values())) == NMEANINGS  # Meaning labels are unique.
